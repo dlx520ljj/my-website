@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>生日快乐，李总！</title>
+    <style>
+        /* 整体页面布局 */
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: url('222.png') no-repeat center center fixed;
+            background-size: cover;
+            overflow: hidden;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        /* 登录容器样式 */
+        #login-container {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 107, 107, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 1s ease, transform 1s ease;
+        }
+        .login-box {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            text-align: center;
+            transition: transform 1s ease;
+        }
+        .login-box:hover {
+            transform: translateY(-10px) rotate(-1deg);
+        }
+        .login-box input {
+            display: block;
+            width: 200px;
+            margin: 1rem auto;
+            padding: 0.8rem;
+            border: 2px solid #ff69b4;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        .login-box input:focus {
+            border-color: #ff1493;
+            box-shadow: 0 0 15px #ff69b4;
+            transform: scale(1.05);
+        }
+        .login-box button {
+            background: #ff69b4;
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(45deg, #ff69b4, #ff1493, #ff69b4);
+        }
+        .login-box button:hover {
+            transform: scale(1.1);
+        }
+        .login-box button::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: rotate(45deg);
+            animation: btnGlow 3s infinite;
+        }
+        @keyframes btnGlow {
+            100% { transform: translate(50%, 50%) rotate(45deg); }
+        }
+        /* 倒计时样式 */
+        #countdown {
+            font-size: 3em;
+            color: white;
+            margin-top: 1rem;
+            animation: fadeIn 1s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes textEntrance {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        /* 新增背景蛋糕飘落动画 */
+        .cake {
+            position: absolute;
+            top: -100px;
+            width: 50px;
+            height: 50px;
+            background: url('cake.png') no-repeat center center / contain;
+            animation: fall linear infinite;
+        }
+        @keyframes fall {
+            to {
+                transform: translateY(110vh);
+            }
+        }
+        /* 心形气泡动画 */
+        .heart {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: url('heart.png') no-repeat center center / contain;
+            animation: float 5s linear infinite;
+        }
+        @keyframes float {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) scale(0.5);
+                opacity: 0;
+            }
+        }
+        /* 气球上升特效样式 */
+        .balloon {
+            position: absolute;
+            bottom: -100px;
+            width: 50px;
+            height: 70px;
+            background: url('balloon.png') no-repeat center center / contain;
+            animation: rise linear infinite;
+        }
+
+        @keyframes rise {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-120vh);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录页面 -->
+    <div id="login-container">
+        <div class="login-box">
+            <h2>🎂 生日密令 🎉</h2>
+            <input type="text" id="name" placeholder="请输入寿星名字" autocomplete="off">
+            <input type="password" id="keyword" placeholder="请输入神秘代码" autocomplete="off">
+            <button onclick="checkAccess()">开启祝福</button>
+        </div>
+    </div>
+
+    <!-- 倒计时页面 -->
+    <div id="countdown-container" style="display: none;">
+        <div id="countdown"></div>
+    </div>
+    <style>
+        /* 新增蛋糕雨样式 */
+        #cake-rain {
+            position: fixed;
+            top: -20px;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 500;
+        }
+    
+        .cake {
+            position: absolute;
+            font-size: 24px;
+            animation: cakeFall linear infinite;
+            opacity: 0.8;
+        }
+    
+        @keyframes cakeFall {
+            0% {
+                transform: translateY(-20vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(120vh) rotate(360deg);
+                opacity: 0.2;
+            }
+        }
+    
+        /* 调整原有背景层 */
+        #login-container {
+            /* 保持原有样式不变 */
+            z-index: 1000; /* 确保登录框在最上层 */
+        }
+    </style>
+    <script>
+        // 在页面加载时创建蛋糕雨
+        window.onload = function() {
+            const cakeEmojis = ['🎂', '🍰', '🎉', '✨'];
+            const container = document.createElement('div');
+            container.id = 'cake-rain';
+            
+            // 创建50个蛋糕元素
+            for (let i = 0; i < 50; i++) {
+                const cake = document.createElement('div');
+                cake.className = 'cake';
+                cake.textContent = cakeEmojis[Math.floor(Math.random() * cakeEmojis.length)];
+                cake.style.left = Math.random() * 100 + '%';
+                cake.style.animationDuration = Math.random() * 3 + 5 + 's';
+                cake.style.animationDelay = Math.random() * 5 + 's';
+                container.appendChild(cake);
+            }
+            
+            document.body.insertBefore(container, document.body.firstChild);
+        };
+    </script>
+    <script>
+        function startCountdown() {
+            let count = 5;
+            const countdownEl = document.getElementById('countdown');
+            const timer = setInterval(() => {
+                countdownEl.innerHTML = `<span>${count}</span><br>神秘祝福加载中...`;
+                count--;
+                if(count < 0) {
+                    clearInterval(timer);
+                    window.location.href = 'fireworks.html';
+                }
+            }, 1000);
+        }
+    
+        // 登录验证逻辑
+        function checkAccess() {
+            const name = document.getElementById('name').value.trim();
+            const keyword = document.getElementById('keyword').value.trim();
+            if(name === "李嘉晟" && keyword.toLowerCase() === "ljs") {
+                const loginContainer = document.getElementById('login-container');
+                loginContainer.style.opacity = '0';
+                loginContainer.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    loginContainer.style.display = 'none';
+                    document.getElementById('countdown-container').style.display = 'flex';
+                    startCountdown();
+                    // 显示烟花特效
+                    showFireworks();
+                }, 1000);
+            } else {
+                const inputs = document.querySelectorAll('.login-box input');
+                inputs.forEach(input => {
+                    input.style.borderColor = 'red';
+                    setTimeout(() => {
+                        input.style.borderColor = '#ff69b4';
+                    }, 500);
+                });
+                alert('❌ 验证未通过，请重新输入');
+            }
+        }
+
+        // 创建蛋糕元素并添加到页面
+        function createCake() {
+            const cake = document.createElement('div');
+            cake.classList.add('cake');
+            cake.style.left = `${Math.random() * 100}vw`;
+            cake.style.animationDuration = `${Math.random() * 3 + 2}s`;
+            document.body.appendChild(cake);
+            setTimeout(() => {
+                cake.remove();
+            }, 5000);
+        }
+
+        // 每隔一段时间生成一个蛋糕
+        setInterval(createCake, 500);
+
+        // 创建心形气泡元素并添加到页面
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            heart.style.left = `${Math.random() * 100}vw`;
+            heart.style.animationDuration = `${Math.random() * 5 + 5}s`;
+            document.body.appendChild(heart);
+            setTimeout(() => {
+                heart.remove();
+            }, 10000);
+        }
+
+        // 每隔一段时间生成一个心形气泡
+        setInterval(createHeart, 1000);
+
+        // 显示烟花特效
+        function showFireworks() {
+            const fireworksContainer = document.createElement('div');
+            fireworksContainer.id = 'fireworks-container';
+            document.body.appendChild(fireworksContainer);
+
+            for (let i = 0; i < 10; i++) {
+                const firework = document.createElement('div');
+                firework.classList.add('firework');
+                firework.style.left = `${Math.random() * 100}vw`;
+                firework.style.animationDuration = `${Math.random() * 2 + 1}s`;
+                fireworksContainer.appendChild(firework);
+            }
+
+            setTimeout(() => {
+                fireworksContainer.remove();
+            }, 3000);
+        }
+
+        // 创建气球元素并添加到页面
+        function createBalloon() {
+            const balloon = document.createElement('div');
+            balloon.classList.add('balloon');
+            balloon.style.left = `${Math.random() * 100}vw`;
+            balloon.style.animationDuration = `${Math.random() * 5 + 5}s`;
+            document.body.appendChild(balloon);
+            setTimeout(() => {
+                balloon.remove();
+            }, 10000);
+        }
+
+        // 每隔一段时间生成一个气球
+        setInterval(createBalloon, 1000);
+    </script>
+</body>
+</html>
